@@ -40,8 +40,6 @@ jobs:
         with:
           rust-version: ${{ matrix.rust_version }}
 
-      - run: rustup target add x86_64-linux-android
-
       - name: Check documentation
         run: cargo doc --no-deps --document-private-items
 
@@ -50,9 +48,3 @@ jobs:
 
       - name: Run tests with std
         run: cargo test --verbose --features std
-
-      - name: Check on Android
-        run: cargo check --verbose --target x86_64-linux-android
-
-      - name: Check on Android with std
-        run: cargo check --verbose --target x86_64-linux-android --features std

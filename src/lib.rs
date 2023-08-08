@@ -10,7 +10,7 @@
 //!
 //! ## Safety guarantees
 //!
-//! Please see the docs of [`HasRawWindowHandle`] and [`HasRawDisplayHandle`].
+//! Please see the docs of [`HasWindowHandle`] and [`HasDisplayHandle`].
 //!
 //! ## Platform handle initialization
 //!
@@ -56,49 +56,6 @@ pub use windows::{Win32WindowHandle, WinRtWindowHandle, WindowsDisplayHandle};
 
 use core::fmt;
 
-/// Window that wraps around a raw window handle.
-///
-/// # Safety
-///
-/// Users can safely assume that non-`null`/`0` fields are valid handles, and it is up to the
-/// implementer of this trait to ensure that condition is upheld.
-///
-/// Despite that qualification, implementers should still make a best-effort attempt to fill in all
-/// available fields. If an implementation doesn't, and a downstream user needs the field, it should
-/// try to derive the field from other fields the implementer *does* provide via whatever methods the
-/// platform provides.
-///
-/// The exact handles returned by `raw_window_handle` must remain consistent between multiple calls
-/// to `raw_window_handle` as long as not indicated otherwise by platform specific events.
-pub unsafe trait HasRawWindowHandle {
-    fn raw_window_handle(&self) -> Result<RawWindowHandle, HandleError>;
-}
-
-unsafe impl<'a, T: HasRawWindowHandle + ?Sized> HasRawWindowHandle for &'a T {
-    fn raw_window_handle(&self) -> Result<RawWindowHandle, HandleError> {
-        (*self).raw_window_handle()
-    }
-}
-unsafe impl<'a, T: HasRawWindowHandle + ?Sized> HasRawWindowHandle for &'a mut T {
-    fn raw_window_handle(&self) -> Result<RawWindowHandle, HandleError> {
-        (**self).raw_window_handle()
-    }
-}
-#[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-unsafe impl<T: HasRawWindowHandle + ?Sized> HasRawWindowHandle for alloc::rc::Rc<T> {
-    fn raw_window_handle(&self) -> Result<RawWindowHandle, HandleError> {
-        (**self).raw_window_handle()
-    }
-}
-#[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-unsafe impl<T: HasRawWindowHandle + ?Sized> HasRawWindowHandle for alloc::sync::Arc<T> {
-    fn raw_window_handle(&self) -> Result<RawWindowHandle, HandleError> {
-        (**self).raw_window_handle()
-    }
-}
-
 /// A window handle for a particular windowing system.
 ///
 /// Each variant contains a struct with fields specific to that windowing system
@@ -115,7 +72,7 @@ unsafe impl<T: HasRawWindowHandle + ?Sized> HasRawWindowHandle for alloc::sync::
 /// some hints on where this variant might be expected.
 ///
 /// Note that these "Availability Hints" are not normative. That is to say, a
-/// [`HasRawWindowHandle`] implementor is completely allowed to return something
+/// [`HasWindowHandle`] implementor is completely allowed to return something
 /// unexpected. (For example, it's legal for someone to return a
 /// [`RawWindowHandle::Xlib`] on macOS, it would just be weird, and probably
 /// requires something like XQuartz be used).
@@ -201,52 +158,6 @@ pub enum RawWindowHandle {
     Haiku(HaikuWindowHandle),
 }
 
-/// Display that wraps around a raw display handle.
-///
-/// # Safety
-///
-/// Users can safely assume that non-`null`/`0` fields are valid handles, and it is up to the
-/// implementer of this trait to ensure that condition is upheld.
-///
-/// Despite that qualification, implementers should still make a best-effort attempt to fill in all
-/// available fields. If an implementation doesn't, and a downstream user needs the field, it should
-/// try to derive the field from other fields the implementer *does* provide via whatever methods the
-/// platform provides.
-///
-/// The exact handles returned by `raw_display_handle` must remain consistent between multiple calls
-/// to `raw_display_handle` as long as not indicated otherwise by platform specific events.
-pub unsafe trait HasRawDisplayHandle {
-    fn raw_display_handle(&self) -> Result<RawDisplayHandle, HandleError>;
-}
-
-unsafe impl<'a, T: HasRawDisplayHandle + ?Sized> HasRawDisplayHandle for &'a T {
-    fn raw_display_handle(&self) -> Result<RawDisplayHandle, HandleError> {
-        (*self).raw_display_handle()
-    }
-}
-
-unsafe impl<'a, T: HasRawDisplayHandle + ?Sized> HasRawDisplayHandle for &'a mut T {
-    fn raw_display_handle(&self) -> Result<RawDisplayHandle, HandleError> {
-        (**self).raw_display_handle()
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-unsafe impl<T: HasRawDisplayHandle + ?Sized> HasRawDisplayHandle for alloc::rc::Rc<T> {
-    fn raw_display_handle(&self) -> Result<RawDisplayHandle, HandleError> {
-        (**self).raw_display_handle()
-    }
-}
-
-#[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-unsafe impl<T: HasRawDisplayHandle + ?Sized> HasRawDisplayHandle for alloc::sync::Arc<T> {
-    fn raw_display_handle(&self) -> Result<RawDisplayHandle, HandleError> {
-        (**self).raw_display_handle()
-    }
-}
-
 /// A display server handle for a particular windowing system.
 ///
 /// The display usually represents a connection to some display server, but it is not necessarily
@@ -269,7 +180,7 @@ unsafe impl<T: HasRawDisplayHandle + ?Sized> HasRawDisplayHandle for alloc::sync
 /// some hints on where this variant might be expected.
 ///
 /// Note that these "Availability Hints" are not normative. That is to say, a
-/// [`HasRawDisplayHandle`] implementor is completely allowed to return something
+/// [`HasDisplayHandle`] implementor is completely allowed to return something
 /// unexpected. (For example, it's legal for someone to return a
 /// [`RawDisplayHandle::Xlib`] on macOS, it would just be weird, and probably
 /// requires something like XQuartz be used).
